@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Addition Practice</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    table {
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    td, th {
+      border: 1px solid #ccc;
+      padding: 5px;
+      text-align: center;
+    }
+    input[type="number"] {
+      width: 60px;
+    }
+    .correct {
+      background-color: #c8e6c9;
+    }
+    .incorrect {
+      background-color: #ffcdd2;
+    }
+    .highlight {
+      background-color: #fff59d;
+    }
+    .answer-label {
+      font-size: 10px;
+      display: block;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>Addition Practice (Manual Row Totals)</h1>
+  <table id="additionTable"></table>
+  <button onclick="checkAnswers()">Check Answers</button>
+  <button onclick="clearAnswers()">Clear All</button>
+
+  <script>
+    const SIZE = 10;
+    const rowHeaders = Array.from({ length: SIZE }, () => Math.floor(Math.random() * 90 + 10));
+    const colHeaders = Array.from({ length: SIZE }, () => Math.floor(Math.random() * 90 + 10));
+
+    const table = document.getElementById('additionTable');
+
+    function createTable() {
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      headRow.appendChild(document.createElement('th'));
+
+      for (let j = 0; j < SIZE; j++) {
+        const th = document.createElement('th');
+        th.innerText = colHeaders[j];
+        headRow.appendChild(th);
+      }
+      const totalTh = document.createElement('th');
+      totalTh.innerText = 'Row Total';
+      headRow.appendChild(totalTh);
+      thead.appendChild(headRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+
+      for (let i = 0; i < SIZE; i++) {
+        const row = document.createElement('tr');
+        const header = document.createElement('th');
+        header.innerText = rowHeaders[i];
+        row.appendChild(header);
+
+        for (let j = 0; j < SIZE; j++) {
+          const cell = document.createElement('td');
+          const input = document.createElement('input');
+          input.type = 'number';
+          input.dataset.expected = rowHeaders[i] + colHeaders[j];
+          input.dataset.row = i;
+          input.dataset.col = j;
+
+          const answerSpan = document.createElement('span');
+          answerSpan.className = 'answer-label';
+          answerSpan.id = `answer-${i}-${j}`;
+
+          cell.appendChild(input);
+          cell.appendChild(answerSpan);
+          row.appendChild(cell);
+        }
+
+        const totalCell = document.createElement('td');
+        const totalInput = document.createElement('input');
+        totalInput.type = 'number';
+        totalInput.className = 'total-input';
+        totalInput.dataset.row = i;
+        const totalAnswer = document.createElement('span');
+        totalAnswer.className = 'answer-label';
+        totalAnswer.id = `total-answer-${i}`;
+        totalCell.appendChild(totalInput);
+        totalCell.appendChild(totalAnswer);
+        row.appendChild(totalCell);
+
+        tbody.appendChild(row);
+      }
+
+      table.appendChild(tbody);
+    }
+
+    function checkAnswers() {
+      const rows = table.getElementsByTagName('tr');
+
+      for (let i = 1; i <= SIZE; i++) {
+        const row = rows[i];
+        let sum = 0;
+        for (let j = 1; j <= SIZE; j++) {
+          const input = row.cells[j].querySelector('input');
+          const expected = parseInt(input.dataset.expected);
+          const value = parseInt(input.value);
+
+          const answerSpan = document.getElementById(`answer-${i - 1}-${j - 1}`);
+          answerSpan.textContent = `Ans: ${expected}`;
+
+          if (isNaN(value)) {
+            input.className = 'highlight';
+          } else if (value === expected) {
+            input.className = 'correct';
+          } else {
+            input.className = 'incorrect';
+          }
+
+          if (!isNaN(value)) sum += value;
+        }
+
+        const totalInput = row.cells[SIZE + 1].querySelector('input');
+        const totalValue = parseInt(totalInput.value);
+        const totalAnswerSpan = document.getElementById(`total-answer-${i - 1}`);
+        totalAnswerSpan.textContent = `Ans: ${sum}`;
+
+        if (totalValue === sum) {
+          totalInput.className = 'correct';
+        } else if (isNaN(totalValue)) {
+          totalInput.className = 'highlight';
+        } else {
+          totalInput.className = 'incorrect';
+        }
+      }
+    }
+
+    function clearAnswers() {
+      const inputs = table.querySelectorAll('input');
+      inputs.forEach(input => {
+        input.value = '';
+        input.className = '';
+      });
+
+      const spans = table.querySelectorAll('.answer-label');
+      spans.forEach(span => span.textContent = '');
+    }
+
+    createTable();
+  </script>
+</body>
+</html>
